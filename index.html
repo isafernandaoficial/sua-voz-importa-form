@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sua Voz Importa - GET Church Global</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/+esm"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1e3a 0%, #1a3a52 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 650px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #0a1e3a;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #c9a961;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #c9a961, #0a1e3a);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section-title {
+            color: #0a1e3a;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #c9a961;
+        }
+
+        .question-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            color: #0a1e3a;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #c9a961;
+            box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-item,
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #c9a961;
+        }
+
+        .radio-item label,
+        .checkbox-item label {
+            margin: 0;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-next,
+        .btn-submit {
+            background: linear-gradient(135deg, #c9a961, #a67e4e);
+            color: white;
+        }
+
+        .btn-next:hover,
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(201, 169, 97, 0.3);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #0a1e3a;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-next:disabled,
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #c9a961;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sua Voz Importa</h1>
+            <p class="subtitle">GET CHURCH GLOBAL - CLÃ ONLINE</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text"><span id="progressText">0%</span></div>
+        </div>
+
+        <div id="successMessage" class="success-message">
+            ✓ Formulário enviado com sucesso! Obrigado pela sua contribuição.
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            ✗ Erro ao enviar formulário. Por favor, tente novamente.
+        </div>
+
+        <form id="form">
+            <!-- SEÇÃO 1: DADOS PESSOAIS -->
+            <div class="section active" id="section0">
+                <h2 class="section-title">1. Dados Pessoais</h2>
+
+                <div class="question-group">
+                    <label>Nome Completo *</label>
+                    <input type="text" name="nome_completo" required>
+                </div>
+
+                <div class="question-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required>
+                </div>
+
+                <div class="question-group">
+                    <label>Telefone *</label>
+                    <input type="tel" name="telefone" required>
+                </div>
+
+                <div class="question-group">
+                    <label>Sexo *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="sexo_m" name="sexo" value="Masculino" required>
+                            <label for="sexo_m">Masculino</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sexo_f" name="sexo" value="Feminino" required>
+                            <label for="sexo_f">Feminino</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sexo_o" name="sexo" value="Outro" required>
+                            <label for="sexo_o">Outro</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Idade *</label>
+                    <input type="number" name="idade" min="1" max="150" required>
+                </div>
+
+                <div class="question-group">
+                    <label>Estado Civil *</label>
+                    <select name="estado_civil" required>
+                        <option value="">Selecionar...</option>
+                        <option value="Solteiro(a)">Solteiro(a)</option>
+                        <option value="Casado(a)">Casado(a)</option>
+                        <option value="Divorciado(a)">Divorciado(a)</option>
+                        <option value="Viúvo(a)">Viúvo(a)</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>É Batizado? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="batizado_sim" name="batizado" value="Sim" required>
+                            <label for="batizado_sim">Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="batizado_nao" name="batizado" value="Não" required>
+                            <label for="batizado_nao">Não</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 2: INFORMAÇÕES DO CLÃ -->
+            <div class="section" id="section1">
+                <h2 class="section-title">2. Informações do Clã</h2>
+
+                <div class="question-group">
+                    <label>Nome do seu Clã *</label>
+                    <input type="text" name="nome_clan" required>
+                </div>
+
+                <div class="question-group">
+                    <label>Há quanto tempo está no Clã? *</label>
+                    <select name="duracao_clan" required>
+                        <option value="">Selecionar...</option>
+                        <option value="Menos de 1 mês">Menos de 1 mês</option>
+                        <option value="1 a 3 meses">1 a 3 meses</option>
+                        <option value="3 a 6 meses">3 a 6 meses</option>
+                        <option value="6 meses a 1 ano">6 meses a 1 ano</option>
+                        <option value="1 a 2 anos">1 a 2 anos</option>
+                        <option value="Mais de 2 anos">Mais de 2 anos</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>É membro da GET (fora do Clã Online)? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="membro_get_sim" name="membro_get" value="Sim" required>
+                            <label for="membro_get_sim">Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="membro_get_nao" name="membro_get" value="Não" required>
+                            <label for="membro_get_nao">Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Frequência nas reuniões do Clã *</label>
+                    <select name="frequencia" required>
+                        <option value="">Selecionar...</option>
+                        <option value="Sempre">Sempre</option>
+                        <option value="Frequentemente">Frequentemente</option>
+                        <option value="Às vezes">Às vezes</option>
+                        <option value="Raramente">Raramente</option>
+                        <option value="Nunca">Nunca</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>Qual horário prefere para as reuniões? *</label>
+                    <select name="horario" required>
+                        <option value="">Selecionar...</option>
+                        <option value="Manhã (até 12h)">Manhã (até 12h)</option>
+                        <option value="Tarde (12h a 18h)">Tarde (12h a 18h)</option>
+                        <option value="Noite (após 18h)">Noite (após 18h)</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>Participação nas reuniões *</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="camera" value="Câmera ligada">
+                            <label>Prefiro ligar câmera</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="audio" value="Áudio ligado">
+                            <label>Prefiro ligar áudio</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 3: ENGAJAMENTO NO CLÃ -->
+            <div class="section" id="section2">
+                <h2 class="section-title">3. Engajamento no Clã</h2>
+
+                <div class="question-group">
+                    <label>Participa do quebra-gelo? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="quebra_gelo" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="quebra_gelo" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Compartilha a palavra nas reuniões? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="compartilhar_palavra" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="compartilhar_palavra" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Sente se acolhido no Clã? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="pertencimento" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="pertencimento" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Qual é a duração ideal de uma reunião? *</label>
+                    <select name="duracao_ideal" required>
+                        <option value="">Selecionar...</option>
+                        <option value="30 minutos">30 minutos</option>
+                        <option value="45 minutos">45 minutos</option>
+                        <option value="1 hora">1 hora</option>
+                        <option value="1h30">1 hora e 30 minutos</option>
+                        <option value="2 horas ou mais">2 horas ou mais</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>Gostaria de mais programação no Clã? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="programacao_extra" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="programacao_extra" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 4: ENVOLVIMENTO NA IGREJA -->
+            <div class="section" id="section3">
+                <h2 class="section-title">4. Envolvimento na Igreja</h2>
+
+                <div class="question-group">
+                    <label>Gostaria de participar de discipulado? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="discipulado" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="discipulado" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Gostaria de ser líder de Clã? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="lider_clan" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="lider_clan" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Gostaria de servir na GET? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="servir_get" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="servir_get" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Gostaria de conectar se com membros da GET fora do seu Clã? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="conectar_membros" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="conectar_membros" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Acompanha as transmissões de domingo? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="transmissao_domingo" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="transmissao_domingo" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <label>Gostaria de participar de programações presenciais quando possível? *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="programacao_presencial" value="Sim" required>
+                            <label>Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="programacao_presencial" value="Não" required>
+                            <label>Não</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 5: FEEDBACK E SUGESTÕES -->
+            <div class="section" id="section4">
+                <h2 class="section-title">5. Feedback e Sugestões</h2>
+
+                <div class="question-group">
+                    <label>O que você mais gosta no Clã Online? *</label>
+                    <textarea name="o_que_gosta" required></textarea>
+                </div>
+
+                <div class="question-group">
+                    <label>O que te incomoda ou poderia melhorar? *</label>
+                    <textarea name="o_que_incomoda" required></textarea>
+                </div>
+
+                <div class="question-group">
+                    <label>Sugestões e comentários adicionais</label>
+                    <textarea name="sugestoes"></textarea>
+                </div>
+            </div>
+
+            <!-- BOTÕES DE NAVEGAÇÃO -->
+            <div class="buttons">
+                <button type="button" class="btn-prev" id="prevBtn" style="display:none;">← Anterior</button>
+                <button type="button" class="btn-next" id="nextBtn">Próximo →</button>
+                <button type="submit" class="btn-submit" id="submitBtn" style="display:none;">Enviar Formulário</button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/+esm'
+
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://vendhicmgeyicycaftqp.supabase.co'
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlbmRoaWNtZ2V5aWN5Y2FmdHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxOTUwNjIsImV4cCI6MjEwNTc3MTA2Mn0.OBFKOvDyANITQNw5x2jkCWq-ROXXfpHOp0tX1t8GN_k'
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+        const form = document.getElementById('form')
+        const sections = document.querySelectorAll('.section')
+        const totalSections = sections.length
+        let currentSection = 0
+
+        // Função para coletar dados do formulário de forma segura
+        function coletarDados() {
+            const dados = {}
+            const elementos = form.querySelectorAll('input, select, textarea')
+
+            elementos.forEach(el => {
+                if (el.type === 'checkbox') {
+                    if (el.checked) {
+                        dados[el.name] = el.value
+                    }
+                } else if (el.type === 'radio') {
+                    if (el.checked) {
+                        dados[el.name] = el.value
+                    }
+                } else if (el.name) {
+                    dados[el.name] = el.value || ''
+                }
+            })
+
+            return dados
+        }
+
+        // Atualizar progresso
+        function updateProgress() {
+            const progress = ((currentSection + 1) / totalSections) * 100
+            document.getElementById('progressFill').style.width = progress + '%'
+            document.getElementById('progressText').textContent = Math.round(progress) + '%'
+        }
+
+        // Mostrar/esconder seções
+        function showSection(n) {
+            if (n >= totalSections) n = totalSections - 1
+            if (n < 0) n = 0
+
+            sections.forEach(s => s.classList.remove('active'))
+            sections[n].classList.add('active')
+            currentSection = n
+
+            // Atualizar botões
+            document.getElementById('prevBtn').style.display = currentSection === 0 ? 'none' : 'inline-block'
+            document.getElementById('nextBtn').style.display = currentSection === totalSections - 1 ? 'none' : 'inline-block'
+            document.getElementById('submitBtn').style.display = currentSection === totalSections - 1 ? 'inline-block' : 'none'
+
+            updateProgress()
+            window.scrollTo(0, 0)
+        }
+
+        // Eventos dos botões
+        document.getElementById('prevBtn').addEventListener('click', (e) => {
+            e.preventDefault()
+            showSection(currentSection - 1)
+        })
+
+        document.getElementById('nextBtn').addEventListener('click', (e) => {
+            e.preventDefault()
+            showSection(currentSection + 1)
+        })
+
+        // Enviar formulário
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault()
+
+            const submitBtn = document.getElementById('submitBtn')
+            submitBtn.disabled = true
+            submitBtn.innerHTML = '<span class="spinner"></span>Enviando...'
+
+            try {
+                // Coletar dados de forma segura
+                const data = coletarDados()
+
+                console.log('Dados coletados:', data)
+
+                // Enviar para Supabase
+                const { error } = await supabase
+                    .from('respostas')
+                    .insert(data)
+
+                if (error) {
+                    console.error('Erro Supabase:', error)
+                    throw new Error(error.message)
+                }
+
+                console.log('Formulário enviado com sucesso')
+
+                // Sucesso
+                document.getElementById('successMessage').style.display = 'block'
+                document.getElementById('errorMessage').style.display = 'none'
+                form.reset()
+                submitBtn.innerHTML = 'Enviar Formulário'
+                submitBtn.disabled = false
+
+                // Voltar ao início
+                setTimeout(() => {
+                    showSection(0)
+                    document.getElementById('successMessage').style.display = 'none'
+                }, 3000)
+
+            } catch (error) {
+                console.error('Erro:', error)
+                document.getElementById('errorMessage').style.display = 'block'
+                document.getElementById('errorMessage').textContent = '✗ Erro: ' + error.message
+                submitBtn.innerHTML = 'Enviar Formulário'
+                submitBtn.disabled = false
+            }
+        })
+
+        // Inicializar
+        showSection(0)
+    </script>
+</body>
+</html>
