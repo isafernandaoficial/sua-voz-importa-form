@@ -137,21 +137,18 @@
             min-height: 100px;
         }
 
-        .radio-group,
-        .checkbox-group {
+        .radio-group {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .radio-item,
-        .checkbox-item {
+        .radio-item {
             display: flex;
             align-items: center;
         }
 
-        input[type="radio"],
-        input[type="checkbox"] {
+        input[type="radio"] {
             width: 18px;
             height: 18px;
             margin-right: 10px;
@@ -159,8 +156,7 @@
             accent-color: #c9a961;
         }
 
-        .radio-item label,
-        .checkbox-item label {
+        .radio-item label {
             margin: 0;
             font-weight: 500;
             cursor: pointer;
@@ -231,12 +227,6 @@
             border-radius: 6px;
             margin-bottom: 20px;
             text-align: center;
-        }
-
-        .loading {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
         }
 
         .spinner {
@@ -403,17 +393,21 @@
                 </div>
 
                 <div class="question-group">
-                    <label>Participação nas reuniões *</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" name="camera" value="Câmera ligada">
-                            <label>Prefiro ligar câmera</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" name="audio" value="Áudio ligado">
-                            <label>Prefiro ligar áudio</label>
-                        </div>
-                    </div>
+                    <label>Gosta de usar câmera nas reuniões? *</label>
+                    <select name="camera" required>
+                        <option value="">Selecionar...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>Gosta de usar áudio nas reuniões? *</label>
+                    <select name="audio" required>
+                        <option value="">Selecionar...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
                 </div>
             </div>
 
@@ -628,11 +622,7 @@
             const elementos = form.querySelectorAll('input, select, textarea')
 
             elementos.forEach(el => {
-                if (el.type === 'checkbox') {
-                    if (el.checked) {
-                        dados[el.name] = el.value
-                    }
-                } else if (el.type === 'radio') {
+                if (el.type === 'radio') {
                     if (el.checked) {
                         dados[el.name] = el.value
                     }
@@ -733,22 +723,3 @@
     </script>
 </body>
 </html>
-
-
-<div class="question-group">
-    <label>Câmera nas reuniões? *</label>
-    <select name="camera" required>
-        <option value="">Selecionar...</option>
-        <option value="Sim">Sim</option>
-        <option value="Não">Não</option>
-    </select>
-</div>
-
-<div class="question-group">
-    <label>Áudio nas reuniões? *</label>
-    <select name="audio" required>
-        <option value="">Selecionar...</option>
-        <option value="Sim">Sim</option>
-        <option value="Não">Não</option>
-    </select>
-</div>
